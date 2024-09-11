@@ -1,20 +1,21 @@
 import requests
 import pandas as pd
-
-BASE_URL = "https://dtic.dimensions.ai"
-params = {
-    "search_mode": "content",
-    "search_type": "kws",
-    "search_field": "full_search",
-    "or_facet_research_org": "grid.214458.e",
-}
-
+import click
+import os
 
 grants = []
 researchers = []
 
 
-def get_page(path="/discover/grant/results.json"):
+def get_organizations(search):
+    response = requests.get('https://dtic.dimensions.ai/completion/publication/research_org.json?query=' + search)
+    if response.status_code > 300:
+        raise Exception(f"Got code {response.status_code}")
+
+    results = response.json()["suggestions"]
+    return results
+
+def get_page(uni_id: str, path="/discover/grant/results.json"):
     """
     Grabs grants data from DTIC Dimensions API, unauthenticated/undocumented/not allowed/etc
     There can be several researchers per grant, hence why it is extracted and processed into its own dataframe
@@ -27,7 +28,14 @@ def get_page(path="/discover/grant/results.json"):
 
     Recursive because the URL for the subsequent call is obtained from the previous call
     """
-    print(f"Trying {path}...")
+        
+    BASE_URL = "https://dtic.dimensions.ai"
+    params = {
+        "search_mode": "content",
+        "search_type": "kws",
+        "search_field": "full_search",
+        "or_facet_research_org": uni_id
+    }
 
     response = requests.get(BASE_URL + path, params)
 
@@ -45,11 +53,37 @@ def get_page(path="/discover/grant/results.json"):
 
     grants.extend(page_grants)
     if len(grants) >= results["count"]:
-        pd.DataFrame(grants).to_csv("results/grants.csv", index=False)
-        pd.DataFrame(researchers).to_csv("results/researchers.csv", index=False)
+        pd.DataFrame(grants).to_csv("grants.csv", index=False)
+        pd.DataFrame(researchers).to_csv("researchers.csv", index=False)
+        click.echo(f"Saved data to 'grants.csv' in this directory ({os.getcwd()}) :)")
     else:
         print(f"Grabbed {len(grants)}/{results["count"]} grants so far.")
-        get_page(results["navigation"]["results_json"])
+        get_page(uni_id, results["navigation"]["results_json"])
 
 
-get_page()
+
+@click.command()
+@click.option('--uni', prompt='Your university', help='Please input your university')
+def prompt(uni):
+    universities = get_organizations(uni)
+    for i, uni in enumerate(universities[:10]):
+        click.echo(f"{i + 1}) {uni['data']['name']}")
+
+    selection = click.prompt("Please select a university (1-10), or type 0 to start over", type=str).lower()
+    if selection == '0':
+        prompt.main()
+        
+    if not selection.isnumeric():
+        click.echo('Invalid selection; please start over.')
+        prompt.main()
+    
+    if not int(float(selection)) in range(1, 10):
+        click.echo('Invalid selection; please start over.')
+        prompt.main()
+        
+    university = universities[int(float(selection)) - 1]
+    click.echo(f'Got it, trying to fetch data for {university['data']['name']} now!')
+    get_page(university['data']['id'])
+    
+if __name__ == '__main__':
+    prompt()
