@@ -1,1 +1,6 @@
 **/*.csv
+*.csv
+*.csv#
+__pycache__
+dist
+build
