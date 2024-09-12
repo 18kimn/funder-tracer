@@ -20,6 +20,8 @@ jobs:
       run:
         shell: bash
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -49,37 +51,9 @@ jobs:
         with:
           name: ${{ matrix.filename }}
           path: dist/${{ matrix.filename }}
-      
-  release:
-    name: Create release
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps: 
-      - name: checkout
-        uses: actions/checkout@v3
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: dist
-        
-      - name: Release
+      - name: release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: |
-            Cross-platform DTIC aggregator executables
-          files: |
-            dist/dtic-linux
-            dist/dtic-macos
-            dist/dtic-windows.exe
-        env:
+          files: dist/${{ matrix.filename }}
+        env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-
-
-          
