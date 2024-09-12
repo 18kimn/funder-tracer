@@ -1,7 +1,9 @@
 name: Build Executables
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
 
 jobs:
   build:
@@ -51,9 +53,11 @@ jobs:
         with:
           name: ${{ matrix.filename }}
           path: dist/${{ matrix.filename }}
+
       - name: release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: dist/${{ matrix.filename }}
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
