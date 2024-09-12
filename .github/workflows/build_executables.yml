@@ -75,6 +75,8 @@ jobs:
             dist/dtic-linux
             dist/dtic-macos
             dist/dtic-windows.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
 
 
