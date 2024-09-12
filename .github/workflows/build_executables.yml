@@ -21,7 +21,13 @@ jobs:
 
       - name: Install Poetry
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
+          if [ $RUNNER_OS == 'Windows' ]; then
+            (Invoke-WebRequest -Uri https://install.python-poetry.org | Invoke-Expression) 
+            $env:PATH += ";$HOME/.local/bin"
+          else
+            curl -sSL https://install.python-poetry.org | python3 -
+            export PATH="$HOME/.local/bin:$PATH"
+          fi
 
       - name: Install dependencies
         run: |
