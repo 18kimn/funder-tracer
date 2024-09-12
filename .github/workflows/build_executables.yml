@@ -8,6 +8,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            filename: dtic-linux
+          - os: macos-latest
+            filename: dtic-macos
+          - os: windows-latest
+            filename: dtic-windows.exe
+
     defaults:
       run:
         shell: bash
@@ -34,11 +42,40 @@ jobs:
       - name: Build executable
         run: |
           source $VENV
-          poetry run pyinstaller --onefile dtic.py
+          poetry run pyinstaller --onefile dtic.py --name ${{ matrix.filename }}
 
       - name: Upload executable
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}-executable
-          path: dist/dtic*
+          name: ${{ matrix.filename }}
+          path: dist/${{ matrix.filename }}
       
+  release:
+    name: Create release
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps: 
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+        
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            Cross-platform DTIC aggregator executables
+          files: |
+            dist/dtic-linux
+            dist/dtic-macos
+            dist/dtic-windows.exe
+        
+
+
+          
