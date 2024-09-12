@@ -30,14 +30,10 @@ jobs:
 
       - name: Install dependencies
         run: poetry install --no-interaction --no-root
-      - name: Install library
-        run: poetry install --no-interaction
-      - run: |
-          source $VENV
-          pytest --version
 
       - name: Build executable
         run: |
+          source $VENV
           poetry run pyinstaller --onefile dtic.py
 
       - name: Upload executable
