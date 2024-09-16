@@ -136,7 +136,8 @@ async def clean_dataset(df: pd.DataFrame):
             "funding_org_name",
             "short_abstract",
             "fields",
-            "link"
+            "link",
+            "linkout"
         ]
     ]
 
