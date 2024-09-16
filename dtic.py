@@ -8,9 +8,6 @@ from concurrent.futures import ThreadPoolExecutor
 import re
 from tqdm import tqdm
 
-grants = []
-researchers = []
-
 BASE_URL = "https://dtic.dimensions.ai"
 
 def get_organizations(search):
@@ -24,7 +21,7 @@ def get_organizations(search):
     results = response.json()["suggestions"]
     return results
 
-def get_grants(uni_id: str, progress=None, path="/discover/grant/results.json", test=False):
+def get_grants(uni_id: str, grants, progress=None, path="/discover/grant/results.json"):
     """
     Grabs grants data from DTIC Dimensions API, unauthenticated/undocumented/not allowed/etc
     There can be several researchers per grant, hence why it is extracted and processed into its own dataframe
@@ -52,23 +49,17 @@ def get_grants(uni_id: str, progress=None, path="/discover/grant/results.json", 
 
     results = response.json()
     page_grants = results["docs"]
-    for grant in page_grants:
-        if not "researcher_details" in grant.keys():
-            continue
-        for researcher in grant["researcher_details"]:
-            researcher["grant_id"] = grant["id"]
-        researchers.extend(grant["researcher_details"])
 
     grants.extend(page_grants)
 
-    if test:
+    if pd.isna(progress):
         return results['count']
     elif len(grants) >= results["count"]:
         progress.update(len(page_grants))
         return pd.DataFrame(grants)
     else:
         progress.update(len(page_grants))
-        return get_grants(uni_id, progress, results["navigation"]["results_json"])
+        return get_grants(uni_id, grants, progress, results["navigation"]["results_json"])
 
 
 async def get_for(grant_id: str, executor, semaphore, loop, progress):
@@ -80,13 +71,13 @@ async def get_for(grant_id: str, executor, semaphore, loop, progress):
                     f"https://dtic.dimensions.ai/details/sources/grant/{grant_id}/for.json"
                 ),
             )
+            fields = ", ".join([r["details"]["name"] for r in results.json()["entities"]])
             progress.update(1)
             # Multiple fields are often present, super super super annoying
-            return ", ".join([r["details"]["name"] for r in results.json()["entities"]])
+            return fields
         except Exception as _:
             progress.update(1)
             return ''
-
 
 async def clean_dataset(df: pd.DataFrame):
     df["researchers"] = df.apply(
@@ -97,15 +88,14 @@ async def clean_dataset(df: pd.DataFrame):
 
     # Get fields (like departments) -- can be multiple per grant
     loop = asyncio.get_event_loop()
-    with tqdm(total=df.shape[0], desc='Grabbing fields', unit='grant') as progress:
+    with tqdm(total=df.shape[0], desc='Grabbing research fields for each grant', unit='grant') as progress:
         semaphore = asyncio.Semaphore(15)
         with ThreadPoolExecutor() as executor:
             tasks = [
                 get_for(grant_id, executor, semaphore, loop, progress)
                 for grant_id in df["id"].to_list()
             ]
-            x = await asyncio.gather(*tasks)
-            df["fields"] = x
+            df['fields'] = await asyncio.gather(*tasks)
 
     # Clean up dates
     df["start_date"] = df.apply(
@@ -170,9 +160,9 @@ def prompt(uni):
     university = universities[int(float(selection)) - 1]
     click.echo(f"Got it, trying to fetch data for {university['data']['name']} now!")
 
-    total_n = get_grants(university['data']['id'], None, '/discover/grant/results.json', True)
+    total_n = get_grants(university['data']['id'], [], None)
     with tqdm(total=total_n, desc='Fetching grants', unit='grant') as progress:
-        df = get_grants(university["data"]["id"], progress)
+        df = get_grants(university["data"]["id"], [], progress)
 
     df = asyncio.run(clean_dataset(df))
     df.to_csv("grants.csv", index=False)
