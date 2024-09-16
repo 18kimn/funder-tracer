@@ -8,9 +8,9 @@ How to run:
 2. Run one of these, depending on your platform (Windows, Linux, or MacOS)
 
 ```
-curl https://github.com/18kimn/funder-tracer/releases/download/v0.1.0/dtic-macos -o dtic
-curl https://github.com/18kimn/funder-tracer/releases/download/v0.1.0/dtic-linux -o dtic
-curl https://github.com/18kimn/funder-tracer/releases/download/v0.1.0/dtic-windows.exe  -o dtic-windows.exe
+curl -L https://github.com/18kimn/funder-tracer/releases/latest/download/dtic-linux -o dtic
+curl -L https://github.com/18kimn/funder-tracer/releases/latest/download/dtic-linux -o dtic
+curl -L https://github.com/18kimn/funder-tracer/releases/latest/download/dtic-windows.exe  -o dtic-windows.exe
 ```
 
 3. Update permissions on the downloaded file so that it's executable
