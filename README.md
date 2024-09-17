@@ -2,7 +2,7 @@
 
 Searches and aggregates data from [https://dtic.dimensions.ai](https://dtic.dimensions.ai).
 
-How to run:
+## How to run
 
 1. Open a terminal
 2. Run one of these, depending on your platform (Windows, Linux, or MacOS)
@@ -24,3 +24,11 @@ chmod +x dtic # Or dtic-windows.exe
 ```
 ./dtic
 ```
+
+## See also
+
+- [Defense Technical Information Center](https://dtic.dimensions.ai/), source for this data
+- [Script to produce some basic summary statistics and trends](grants.R)
+- [Researchers Against War Linktree](https://linktr.ee/researchers_against_war)
+- [USASpending.gov](https://www.usaspending.gov), has a greater
+  variety of sources but without some useful information (research fields, abstract, etc)
