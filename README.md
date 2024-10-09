@@ -8,9 +8,9 @@ Searches and aggregates data from [https://dtic.dimensions.ai](https://dtic.dime
 2. Run one of these, depending on your platform (Windows, Linux, or MacOS)
 
 ```
-curl -L https://github.com/18kimn/funder-tracer/releases/latest/download/dtic-linux -o dtic
-curl -L https://github.com/18kimn/funder-tracer/releases/latest/download/dtic-linux -o dtic
 curl -L https://github.com/18kimn/funder-tracer/releases/latest/download/dtic-windows.exe  -o dtic-windows.exe
+curl -L https://github.com/18kimn/funder-tracer/releases/latest/download/dtic-macos -o dtic
+curl -L https://github.com/18kimn/funder-tracer/releases/latest/download/dtic-linux -o dtic
 ```
 
 3. Update permissions on the downloaded file so that it's executable
