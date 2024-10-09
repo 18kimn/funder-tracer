@@ -46,7 +46,7 @@ jobs:
       - name: Build executable
         run: |
           source $VENV
-          poetry run pyinstaller --hidden-import=_posixsubprocess --onefile dtic.py --name ${{ matrix.filename }}
+          poetry run pyinstaller --onefile dtic.py --name ${{ matrix.filename }}
 
       - name: Upload executable
         uses: actions/upload-artifact@v3
