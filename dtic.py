@@ -7,14 +7,16 @@ import requests
 from concurrent.futures import ThreadPoolExecutor
 import re
 from tqdm import tqdm
+import multiprocessing
 
 BASE_URL = "https://dtic.dimensions.ai"
 
 def get_organizations(search):
     response = requests.get(
-        "https://dtic.dimensions.ai/completion/publication/research_org.json?query="
+        "https://dtic.dimensions.ai/completion/grant/research_org.json?query="
         + search
     )
+
     if response.status_code > 300:
         raise Exception(f"Got code {response.status_code}")
 
@@ -173,4 +175,5 @@ def prompt(uni):
 
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     prompt()
