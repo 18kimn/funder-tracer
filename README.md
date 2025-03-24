@@ -4,7 +4,7 @@ Searches and aggregates data from
 [https://dtic.dimensions.ai](https://dtic.dimensions.ai).
 
 No guarantees that this will work at any given point!
-Depends on undocumented routes etc. Message me on Signal at
+Depends on undocumented routes, etc. Message me on Signal at
 nathanckim18.49 for more discussion.
 
 ## How to run
