@@ -3,7 +3,6 @@ import pandas as pd
 import click
 import os
 import asyncio
-import requests
 from concurrent.futures import ThreadPoolExecutor
 import re
 from tqdm import tqdm
@@ -13,7 +12,7 @@ BASE_URL = "https://dtic.dimensions.ai"
 
 def get_organizations(search):
     response = requests.get(
-        "https://dtic.dimensions.ai/completion/grant/research_org.json?query="
+        "https://dtic.dimensions.ai/completion/extended/grant/research_org.json?query="
         + search
     )
 
